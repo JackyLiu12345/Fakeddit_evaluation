@@ -60,8 +60,8 @@ Results are saved to `results.csv` and metrics are printed to stdout.
 This repo includes an executable diagnostics script:
 
 ```bash
-cd /home/runner/work/Fakeddit_evaluation/Fakeddit_evaluation
-chmod +x /home/runner/work/Fakeddit_evaluation/Fakeddit_evaluation/diagnose.sh
+cd Fakeddit_evaluation
+chmod +x diagnose.sh
 ./diagnose.sh
 ```
 

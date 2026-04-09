@@ -16,6 +16,12 @@ import tempfile
 
 import pandas as pd
 
+try:
+    import gdown
+    _GDOWN_AVAILABLE = True
+except ImportError:
+    _GDOWN_AVAILABLE = False
+
 from config import (
     DEFAULT_RANDOM_SEED,
     DEFAULT_SAMPLE_FRACTION,
@@ -39,9 +45,9 @@ _MANUAL_DOWNLOAD_MSG = """\
 ║    1. Open this URL in a browser:                                  ║
 ║       https://drive.google.com/uc?id={file_id}                     ║
 ║    2. Save the file to a local folder, e.g.  ./data/               ║
-║    3. Re-run with --data-dir pointing to that folder:              ║
+║    3. Re-run your script with --data-dir pointing to that folder:  ║
 ║                                                                    ║
-║       python evaluate.py --data-dir ./data/                        ║
+║       python <your_script>.py --data-dir ./data/                   ║
 ║                                                                    ║
 ║  Expected filename: {filename}                                     ║
 ║  (or any .tsv file matching that split)                            ║
@@ -69,7 +75,15 @@ def _download_tsv_to_dataframe(file_id: str, split_name: str) -> pd.DataFrame:
     RuntimeError
         If the download or parsing fails.
     """
-    import gdown
+    if not _GDOWN_AVAILABLE:
+        expected_fn = LOCAL_TSV_FILENAMES.get(split_name, f"{split_name}.tsv")
+        raise RuntimeError(
+            "gdown is not installed. Install with: pip install gdown\n"
+            "Alternatively, download TSV files manually and use --data-dir."
+            + _MANUAL_DOWNLOAD_MSG.format(
+                file_id=file_id, filename=expected_fn
+            )
+        )
 
     url = f"https://drive.google.com/uc?id={file_id}"
 

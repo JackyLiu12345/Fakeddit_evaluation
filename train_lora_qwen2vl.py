@@ -224,8 +224,10 @@ class FakedditSFTDataset(torch.utils.data.Dataset):
         self._items = []
 
         rows = df.iterrows()
+        total_rows = min(len(df), max_train_samples) if max_train_samples else len(df)
         count = 0
-        for _, row in rows:
+        skipped = 0
+        for idx, (_, row) in enumerate(rows):
             if max_train_samples is not None and count >= max_train_samples:
                 break
 
@@ -244,7 +246,14 @@ class FakedditSFTDataset(torch.utils.data.Dataset):
             try:
                 image = download_image(image_url)
             except Exception as exc:
+                skipped += 1
                 logger.debug("Skipping row — image download failed: %s", exc)
+                if skipped % 50 == 0:
+                    logger.warning(
+                        "Image download: %d images skipped so far "
+                        "(latest: %s).",
+                        skipped, exc,
+                    )
                 continue
 
             self._items.append(
@@ -255,8 +264,16 @@ class FakedditSFTDataset(torch.utils.data.Dataset):
                 }
             )
             count += 1
+            if count % 100 == 0:
+                logger.info(
+                    "Image download progress: %d/%d loaded, %d skipped.",
+                    count, total_rows, skipped,
+                )
 
-        logger.info("FakedditSFTDataset: %d valid samples loaded.", len(self._items))
+        logger.info(
+            "FakedditSFTDataset: %d valid samples loaded (%d skipped).",
+            len(self._items), skipped,
+        )
 
     def __len__(self):
         return len(self._items)

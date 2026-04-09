@@ -174,9 +174,10 @@ def _parse_predicted_label(raw_text: str, n_way: int) -> str:
 
     # Strategy 1: Exact first-token match.
     first_token = re.split(r"[\s.,;:!?]+", text_lower)[0]
-    for label in labels_by_length:
-        if first_token == label.lower():
-            return label
+    if first_token:  # Guard against empty string when text starts with delimiters.
+        for label in labels_by_length:
+            if first_token == label.lower():
+                return label
 
     # Strategy 2: First-line match — check whole first non-empty line.
     for line in raw_stripped.splitlines():
@@ -391,6 +392,8 @@ def run_evaluation(
             "id": sample_id,
             "true_label": true_label,
             "predicted_label": predicted_label,
+            # Multiple responses (self-consistency > 1) are joined with " ||| ".
+            # This separator is unlikely to appear in model outputs for this task.
             "raw_response": " ||| ".join(raw_responses),
             "prompt_strategy": prompt_strategy,
             "self_consistency_n": self_consistency_n,

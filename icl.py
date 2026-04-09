@@ -320,8 +320,9 @@ def majority_vote(predictions: List[str]) -> str:
     """
     Return the most common prediction string from *predictions*.
 
-    In case of a tie, the first-occurring majority label (alphabetically
-    if still tied) is returned.  Returns ``"unknown"`` for an empty list.
+    In case of a tie, the alphabetically earliest label is returned to ensure
+    deterministic behaviour across Python versions and implementations.
+    Returns ``"unknown"`` for an empty list.
 
     Parameters
     ----------
@@ -335,6 +336,8 @@ def majority_vote(predictions: List[str]) -> str:
     if not predictions:
         return "unknown"
     counter = Counter(predictions)
-    # most_common returns in insertion/count order; ties are broken
-    # deterministically by Python's stable sort on the count.
-    return counter.most_common(1)[0][0]
+    max_count = counter.most_common(1)[0][1]
+    # Collect all labels that share the maximum count, then sort alphabetically
+    # to guarantee deterministic tie-breaking.
+    tied = sorted(label for label, cnt in counter.items() if cnt == max_count)
+    return tied[0]

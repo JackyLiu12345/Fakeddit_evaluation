@@ -303,14 +303,17 @@ class FakedditSFTDataset(torch.utils.data.Dataset):
         labels = input_ids.clone()
 
         # Locate the assistant's reply in the token sequence.
-        # We do this by encoding just the assistant response and finding
-        # where the user turn ends.
+        # We encode the gold label alone to determine how many tokens it occupies,
+        # then mask all preceding tokens with -100.
+        # Assumption: the chat template always places the assistant reply at the
+        # very end of the sequence (standard for decoder-only models).
         assistant_tokens = self.processor.tokenizer(
             gold_label, return_tensors="pt", add_special_tokens=False
         )["input_ids"].squeeze(0)
         assistant_len = len(assistant_tokens)
 
-        # Mask everything except the last assistant_len tokens with -100.
+        # Mask everything except the last assistant_len tokens with -100 so that
+        # the language-model loss is computed only on the assistant's output.
         if assistant_len < len(labels):
             labels[: len(labels) - assistant_len] = -100
 
@@ -363,7 +366,9 @@ def _collate_fn(batch: List[Dict], pad_token_id: int):
                 [item["pixel_values"] for item in batch]
             )
         else:
-            # Variable shapes — concatenate along the patch dimension.
+            # Variable image sizes: concatenate along the batch dimension.
+            # Each tensor is unsqueezed to add a leading batch dimension before
+            # concatenation, producing a (batch_size, ...) tensor.
             result["pixel_values"] = torch.cat(
                 [item["pixel_values"].unsqueeze(0) for item in batch], dim=0
             )

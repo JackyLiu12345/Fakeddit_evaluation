@@ -91,17 +91,52 @@ PY
 echo
 echo "== [7/8] Image downloader spot-check =="
 python - <<'PY'
+import functools
+import tempfile
+import threading
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+
+from PIL import Image
 from utils import download_image
-urls = [
-    "https://upload.wikimedia.org/wikipedia/commons/3/3f/Fronalpstock_big.jpg",
-    "https://i.imgur.com/removed.png",
-]
-for url in urls:
+
+
+class _SilentHandler(SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        pass
+
+
+with tempfile.TemporaryDirectory() as tmpdir:
+    tmp_path = Path(tmpdir)
+    Image.new("RGB", (32, 24), color=(12, 34, 56)).save(tmp_path / "ok.png")
+
+    handler = functools.partial(_SilentHandler, directory=tmpdir)
+    server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
+    host, port = server.server_address
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
     try:
-        img = download_image(url)
-        print("OK:", url, "size=", img.size, "mode=", img.mode)
-    except Exception as e:
-        print("FAIL:", url, "->", e)
+        checks = [
+            (f"http://{host}:{port}/ok.png", True),
+            (f"http://{host}:{port}/missing.png", False),
+        ]
+        for url, should_succeed in checks:
+            try:
+                img = download_image(url)
+                if should_succeed:
+                    print("OK:", url, "size=", img.size, "mode=", img.mode)
+                else:
+                    print("UNEXPECTED_OK:", url, "size=", img.size, "mode=", img.mode)
+            except Exception as e:
+                if should_succeed:
+                    print("FAIL:", url, "->", e)
+                else:
+                    print("EXPECTED_FAIL:", url, "->", e)
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=2)
 PY
 
 echo

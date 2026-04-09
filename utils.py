@@ -113,9 +113,10 @@ def download_image(url: str) -> Image.Image:
             return image
         except requests.exceptions.HTTPError as exc:
             last_exc = exc
-            if response.status_code == 429:
+            status = exc.response.status_code if exc.response is not None else 0
+            if status == 429:
                 # Rate-limited — use longer, smarter back-off.
-                wait = _get_429_wait(response, attempt)
+                wait = _get_429_wait(exc.response, attempt)
                 logger.warning(
                     "Rate-limited (429) downloading %s (attempt %d/%d). "
                     "Waiting %.1fs …",

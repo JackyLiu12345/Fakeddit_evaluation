@@ -100,6 +100,11 @@ from pathlib import Path
 from PIL import Image
 from utils import download_image
 
+_TEST_IMAGE_WIDTH = 32
+_TEST_IMAGE_HEIGHT = 24
+_TEST_IMAGE_RGB = (12, 34, 56)
+_SERVER_JOIN_TIMEOUT_SEC = 2
+
 
 class _SilentHandler(SimpleHTTPRequestHandler):
     def log_message(self, format, *args):
@@ -108,7 +113,11 @@ class _SilentHandler(SimpleHTTPRequestHandler):
 
 with tempfile.TemporaryDirectory() as tmpdir:
     tmp_path = Path(tmpdir)
-    Image.new("RGB", (32, 24), color=(12, 34, 56)).save(tmp_path / "ok.png")
+    Image.new(
+        "RGB",
+        (_TEST_IMAGE_WIDTH, _TEST_IMAGE_HEIGHT),
+        color=_TEST_IMAGE_RGB,
+    ).save(tmp_path / "ok.png")
 
     handler = functools.partial(_SilentHandler, directory=tmpdir)
     server = ThreadingHTTPServer(("127.0.0.1", 0), handler)
@@ -136,7 +145,7 @@ with tempfile.TemporaryDirectory() as tmpdir:
     finally:
         server.shutdown()
         server.server_close()
-        thread.join(timeout=2)
+        thread.join(timeout=_SERVER_JOIN_TIMEOUT_SEC)
 PY
 
 echo

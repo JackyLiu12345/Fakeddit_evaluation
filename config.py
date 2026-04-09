@@ -48,3 +48,12 @@ LABEL_COLUMN = {
     3: "3_way_label",
     6: "6_way_label",
 }
+
+# ── Expected TSV filenames when loading from a local directory ────────────────
+# These match the default filenames used by the official Fakeddit dataset.
+# Users can place pre-downloaded TSV files in a directory and pass --data-dir.
+LOCAL_TSV_FILENAMES = {
+    "train":    "multimodal_train.tsv",
+    "validate": "multimodal_validate.tsv",
+    "test":     "multimodal_test_public.tsv",
+}

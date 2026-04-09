@@ -35,5 +35,8 @@ Thumbs.db
 # Training outputs and adapter checkpoints
 outputs/
 
+# Local data directory (pre-downloaded TSV files)
+data/
+
 # Filled-in report copies (keep the template, ignore personal copies)
 reports/*.filled.md

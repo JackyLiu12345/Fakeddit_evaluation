@@ -65,6 +65,7 @@ All flags and their defaults:
 | `--output` | `results.csv` | Output CSV path |
 | `--device` | `auto` | `cuda`, `cpu`, or `auto` |
 | `--max-samples` | `None` | Cap on number of samples (useful for testing) |
+| `--data-dir` | `None` | Path to local TSV files (bypasses Google Drive) |
 | `--verbose` | `False` | Enable DEBUG logging |
 
 ---
@@ -180,6 +181,7 @@ python train_lora_qwen2vl.py \
 | `--lora-r` | `16` | LoRA rank |
 | `--lora-alpha` | `32` | LoRA alpha scaling factor |
 | `--lora-dropout` | `0.05` | LoRA dropout probability |
+| `--data-dir` | `None` | Path to local TSV files (bypasses Google Drive) |
 
 ### Required extra packages
 
@@ -262,6 +264,51 @@ Filled copies (`*.filled.md`) are excluded from Git by `.gitignore` by conventio
 | `train_lora_qwen2vl.py` | LoRA SFT training pipeline for Qwen2-VL |
 | `lora_infer_qwen2vl.py` | Single-sample inference with a trained LoRA adapter |
 | `reports/model_comparison_template.md` | Markdown report template for documenting experiment results |
+
+---
+
+## Troubleshooting: Google Drive Download Errors
+
+If you see an error like:
+
+```
+gdown.exceptions.FileURLRetrievalError: Cannot retrieve the public link of the file.
+You may need to change the permission to 'Anyone with the link', or have had many accesses.
+```
+
+This means Google Drive is blocking the automatic download (usually due to rate-limiting or permission changes). **Workaround — use local files:**
+
+### Step 1: Download the TSV files manually
+
+Open these links in your browser and save the files:
+
+| Split | Google Drive link | Save as |
+|-------|-------------------|---------|
+| test | [Download](https://drive.google.com/uc?id=1GqQtt86gxdGMjbx7KxM4XQyWQGvpEX2M) | `multimodal_test_public.tsv` |
+| validate | [Download](https://drive.google.com/uc?id=1yNEEzn3EjjhywIAb9Xli_mF5O65nQ9cx) | `multimodal_validate.tsv` |
+| train | [Download](https://drive.google.com/uc?id=1iu-H12Rvmz_XW3lK9IH7bwMfOpKddhE8) | `multimodal_train.tsv` |
+
+Or download them from the [official Fakeddit Google Drive folder](https://drive.google.com/drive/folders/1jU7qgDqU1je9Y0PMKJ_f31yXRo5uWGFm).
+
+### Step 2: Place the files in a directory
+
+```bash
+mkdir -p data
+# Move your downloaded files into the data/ folder
+mv ~/Downloads/multimodal_test_public.tsv data/
+```
+
+### Step 3: Re-run with `--data-dir`
+
+```bash
+# Evaluation
+python evaluate.py --data-dir ./data/
+
+# Training
+python train_lora_qwen2vl.py --data-dir ./data/
+```
+
+> **Tip:** The `--data-dir` flag works with all scripts and can be combined with any other flags (e.g. `--task`, `--split`, `--max-samples`).
 
 ---
 

@@ -151,6 +151,16 @@ def _parse_args(argv=None):
         action="store_true",
         help="Enable DEBUG-level logging.",
     )
+    parser.add_argument(
+        "--data-dir",
+        default=None,
+        dest="data_dir",
+        help=(
+            "Path to a local directory containing pre-downloaded Fakeddit TSV "
+            "files.  When provided, Google Drive download is skipped entirely. "
+            "Use this if gdown fails due to rate-limiting or permission errors."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -397,7 +407,8 @@ def train(args):
     logger.info(
         "Loading '%s' split (%.0f%% sample) …", args.split, args.sample_fraction * 100
     )
-    df = load_split(args.split, sample_fraction=args.sample_fraction)
+    df = load_split(args.split, sample_fraction=args.sample_fraction,
+                    data_dir=args.data_dir)
 
     label_col = cfg.LABEL_COLUMN[args.task]
     if label_col not in df.columns:

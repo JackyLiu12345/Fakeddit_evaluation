@@ -23,6 +23,9 @@ Usage examples
 
 # Quick test with only 20 samples:
     python evaluate.py --max-samples 20
+
+# Use local TSV files if Google Drive download fails:
+    python evaluate.py --data-dir ./data/
 """
 
 import argparse
@@ -148,6 +151,16 @@ def _parse_args(argv=None):
         dest="max_samples",
         help="Cap the number of samples evaluated (useful for quick testing).",
     )
+    parser.add_argument(
+        "--data-dir",
+        default=None,
+        dest="data_dir",
+        help=(
+            "Path to a local directory containing pre-downloaded Fakeddit TSV "
+            "files.  When provided, Google Drive download is skipped entirely. "
+            "Use this if gdown fails due to rate-limiting or permission errors."
+        ),
+    )
 
     return parser.parse_args(argv)
 
@@ -246,6 +259,7 @@ def run_evaluation(
     include_rationale: bool = False,
     self_consistency_n: int = 1,
     max_samples: Optional[int] = None,
+    data_dir: Optional[str] = None,
 ) -> Optional[dict]:
     """
     Orchestrate data loading, model inference, and result saving.
@@ -269,6 +283,9 @@ def run_evaluation(
         If > 1, generate N responses per sample and apply majority voting.
     max_samples:
         Cap on the number of samples to evaluate (None = no cap).
+    data_dir:
+        Path to a local directory with pre-downloaded TSV files.  When
+        provided, Google Drive download is skipped entirely.
 
     Returns
     -------
@@ -278,7 +295,7 @@ def run_evaluation(
 
     # ── 1. Load data ──────────────────────────────────────────────────────────
     logger.info("Loading '%s' split (%.0f%% sample) …", split, sample_fraction * 100)
-    df = load_split(split, sample_fraction=sample_fraction)
+    df = load_split(split, sample_fraction=sample_fraction, data_dir=data_dir)
 
     if label_col not in df.columns:
         logger.error("Label column '%s' not found in dataset.", label_col)
@@ -438,6 +455,7 @@ def main(argv=None):
         include_rationale=args.include_rationale,
         self_consistency_n=args.self_consistency_n,
         max_samples=args.max_samples,
+        data_dir=args.data_dir,
     )
 
 

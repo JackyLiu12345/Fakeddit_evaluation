@@ -107,7 +107,7 @@ _SERVER_JOIN_TIMEOUT_SEC = 2
 
 
 class _SilentHandler(SimpleHTTPRequestHandler):
-    def log_message(self, format, *args):
+    def log_message(self, message_format, *args):
         pass
 
 
@@ -146,6 +146,12 @@ with tempfile.TemporaryDirectory() as tmpdir:
         server.shutdown()
         server.server_close()
         thread.join(timeout=_SERVER_JOIN_TIMEOUT_SEC)
+        if thread.is_alive():
+            print(
+                "WARN: local test server thread did not stop within",
+                _SERVER_JOIN_TIMEOUT_SEC,
+                "seconds.",
+            )
 PY
 
 echo

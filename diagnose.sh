@@ -49,7 +49,10 @@ df = load_split(split, sample_fraction=frac)
 print("rows:", len(df))
 print("columns:", list(df.columns))
 if len(df):
-    has_image_ok = df["hasImage"].astype(str).str.lower().isin({"true", "1"})
+    has_image_ok = (
+        df["hasImage"].isin([True, 1])
+        | df["hasImage"].astype(str).str.lower().isin({"true", "1"})
+    )
     has_url_ok = df["image_url"].notna() & (df["image_url"].str.strip() != "")
     print("hasImage true/1 ratio:", float(has_image_ok.mean()))
     print("non-empty image_url ratio:", float(has_url_ok.mean()))

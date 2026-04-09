@@ -55,6 +55,36 @@ Results are saved to `results.csv` and metrics are printed to stdout.
 
 ---
 
+## Diagnostics Checklist Script
+
+This repo includes an executable diagnostics script:
+
+```bash
+cd /home/runner/work/Fakeddit_evaluation/Fakeddit_evaluation
+chmod +x /home/runner/work/Fakeddit_evaluation/Fakeddit_evaluation/diagnose.sh
+./diagnose.sh
+```
+
+Optional arguments:
+
+```bash
+./diagnose.sh [split] [task] [sample_fraction]
+# example
+./diagnose.sh validate 3 0.01
+```
+
+To run a full smoke inference pass (heavier, loads model):
+
+```bash
+SMOKE=1 ./diagnose.sh test 2 0.01
+```
+
+The script checks environment/config, data loading and filtering, label distribution,
+label parsing behavior, image download behavior, and (optionally) end-to-end
+evaluation + metrics recomputation.
+
+---
+
 ## Project Structure
 
 ```

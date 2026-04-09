@@ -107,7 +107,7 @@ _SERVER_JOIN_TIMEOUT_SEC = 2
 
 
 class _SilentHandler(SimpleHTTPRequestHandler):
-    def log_message(self, _message_format, *args):
+    def log_message(self, _message_format, *_args):
         pass
 
 

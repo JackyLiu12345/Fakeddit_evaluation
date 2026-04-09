@@ -1,0 +1,28 @@
+# ── Core HuggingFace evaluation stack ────────────────────────────────────────
+transformers>=4.40.0
+torch>=2.0
+pandas
+numpy
+requests
+gdown
+tqdm
+scikit-learn
+Pillow
+accelerate
+
+# ── Parameter-efficient fine-tuning (LoRA / QLoRA) ───────────────────────────
+peft>=0.10.0
+
+# ── HuggingFace Datasets (optional; useful for streaming / caching) ──────────
+datasets>=2.18.0
+
+# ── 4-bit quantisation for QLoRA (optional at runtime) ───────────────────────
+# Install with: pip install bitsandbytes
+# Required only when running train_lora_qwen2vl.py with --use-qlora
+bitsandbytes>=0.43.0
+
+# ── TRL (optional; alternative SFT trainer) ──────────────────────────────────
+# trl>=0.8.0
+
+# ── einops (required by some Qwen2-VL vision stack variants) ─────────────────
+einops
